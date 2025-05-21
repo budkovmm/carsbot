@@ -2,9 +2,9 @@ package main
 
 import (
 	"log"
-	"os"
 	"time"
 
+	"carsbot/config"
 	"carsbot/interanal/bot"
 
 	"gopkg.in/telebot.v4"
@@ -20,8 +20,14 @@ func setBotCommands(b *telebot.Bot) error {
 }
 
 func main() {
+	cfg, err := config.LoadConfig()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	pref := telebot.Settings{
-		Token:  os.Getenv("TG_BOT_TOKEN"),
+		Token:  cfg.TelegramToken,
 		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
 	}
 
