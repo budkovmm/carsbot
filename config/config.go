@@ -8,7 +8,7 @@ type Config struct {
 	TelegramToken string `mapstructure:"telegram_token"`
 }
 
-func LoadConfig() (*Config, error) {
+func Load() (*Config, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
