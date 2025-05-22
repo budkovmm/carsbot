@@ -1,66 +1,64 @@
 package fsm
 
-import "carsbot/internal/state"
+import (
+	"log/slog"
+
+	"carsbot/internal/state"
+)
 
 type FSM interface {
-	NextStep(st *state.UserState, input string) (string, error)
+	Transition(st *state.UserState, input string)
 }
 
 type SimpleFSM struct{}
 
-func NewFSM() *SimpleFSM { return &SimpleFSM{} }
+func NewFSM() *SimpleFSM {
+	slog.Info("fsm created")
+	return &SimpleFSM{}
+}
 
-func (f *SimpleFSM) NextStep(st *state.UserState, input string) (string, error) {
+func (f *SimpleFSM) Transition(st *state.UserState, input string) {
 	switch st.Step {
 	case 0:
 		st.Step = 1
-		return "Введите ФИО продавца:", nil
+		return
 	case 1:
 		st.SellerName = input
 		st.Step = 2
-		return "Введите ФИО покупателя:", nil
+		return
 	case 2:
 		st.BuyerName = input
 		st.Step = 3
-		return "Введите VIN автомобиля:", nil
+		return
 	case 3:
 		st.VIN = input
 		st.Step = 4
-		return "Введите марку и модель автомобиля:", nil
+		return
 	case 4:
 		st.BrandModel = input
 		st.Step = 5
-		return "Введите год выпуска автомобиля:", nil
+		return
 	case 5:
 		st.Year = input
 		st.Step = 6
-		return "Введите цвет автомобиля:", nil
+		return
 	case 6:
 		st.Color = input
 		st.Step = 7
-		return "Введите стоимость автомобиля (в рублях):", nil
+		return
 	case 7:
 		st.Price = input
 		st.Step = 8
-		return "Введите дату сделки (например, 12.06.2024):", nil
+		return
 	case 8:
 		st.Date = input
 		st.Step = 9
-		return "Введите город сделки:", nil
+		return
 	case 9:
 		st.City = input
 		st.Step = 10
-		return "Спасибо! Вот все данные, которые вы ввели:\n" +
-			"ФИО продавца: " + st.SellerName + "\n" +
-			"ФИО покупателя: " + st.BuyerName + "\n" +
-			"VIN: " + st.VIN + "\n" +
-			"Марка/модель: " + st.BrandModel + "\n" +
-			"Год выпуска: " + st.Year + "\n" +
-			"Цвет: " + st.Color + "\n" +
-			"Стоимость: " + st.Price + " руб.\n" +
-			"Дата сделки: " + st.Date + "\n" +
-			"Город сделки: " + st.City + "\n", nil
+		return
 	default:
-		return "Оформление завершено. Введите /reset для нового договора.", nil
+		return
 	}
 }

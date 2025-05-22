@@ -1,5 +1,7 @@
 package state
 
+import "log/slog"
+
 type UserState struct {
 	Step       int
 	SellerName string
@@ -24,16 +26,19 @@ type InMemoryStorage struct {
 }
 
 func NewInMemoryStorage() *InMemoryStorage {
+	slog.Info("in-memory storage created")
 	return &InMemoryStorage{data: make(map[int64]*UserState)}
 }
 
 func (s *InMemoryStorage) Get(userID int64) (*UserState, error) {
 	return s.data[userID], nil
 }
+
 func (s *InMemoryStorage) Set(userID int64, state *UserState) error {
 	s.data[userID] = state
 	return nil
 }
+
 func (s *InMemoryStorage) Delete(userID int64) error {
 	delete(s.data, userID)
 	return nil

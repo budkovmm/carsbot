@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"log/slog"
+
 	"carsbot/internal/fsm"
 	"carsbot/internal/state"
 
@@ -14,12 +16,13 @@ type Handler struct {
 }
 
 func NewHandler(storage state.StateStorage, fsm fsm.FSM, msg *MessageGenerator) *Handler {
+	slog.Info("handler created")
 	return &Handler{storage: storage, fsm: fsm, msg: msg}
 }
 
 func (h *Handler) Register(b *telebot.Bot) {
 	b.Handle("/start", func(c telebot.Context) error {
-		return c.Send("👋 Здравствуйте! Я помогу вам оформить договор купли-продажи автомобиля.\n\nЧтобы начать, просто напишите любое сообщение или нажмите кнопку ниже.")
+		return c.Send(h.msg.Start())
 	})
 
 	b.Handle(telebot.OnText, func(c telebot.Context) error {
@@ -29,22 +32,18 @@ func (h *Handler) Register(b *telebot.Bot) {
 			st = &state.UserState{Step: 0}
 			h.storage.Set(userID, st)
 		}
-		resp, _ := h.fsm.NextStep(st, c.Text())
+		h.fsm.Transition(st, c.Text())
 		h.storage.Set(userID, st)
-		return c.Send(resp)
+		return c.Send(h.msg.GenerateByState(st))
 	})
 
 	b.Handle("/reset", func(c telebot.Context) error {
 		userID := c.Sender().ID
 		h.storage.Delete(userID)
-		return c.Send("Состояние сброшено. Введите 'Оформить договор' чтобы начать заново.")
+		return c.Send(h.msg.Reset())
 	})
 
 	b.Handle("/help", func(c telebot.Context) error {
-		helpMsg := "ℹ️ Я — бот для оформления договора купли-продажи автомобиля.\n" +
-			"/start — начать работу\n" +
-			"/reset — начать оформление заново\n" +
-			"/help — справка по командам."
-		return c.Send(helpMsg)
+		return c.Send(h.msg.Help())
 	})
 }

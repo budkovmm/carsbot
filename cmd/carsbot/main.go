@@ -1,16 +1,48 @@
 package main
 
 import (
+	"context"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"carsbot/config"
-	"carsbot/internal/app"
-	"log"
+	"carsbot/internal/bot"
+	"carsbot/internal/fsm"
+	"carsbot/internal/state"
 )
 
 func main() {
+	// Initialize logger
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
+	// Load config
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("config error: %v", err)
+		logger.Error("config error", "err", err)
+		panic(err)
 	}
-	a := app.NewApp(cfg)
-	a.Start()
+
+	// Initialize storage
+	storage := state.NewInMemoryStorage()
+
+	// Initialize FSM
+	fsmEngine := fsm.NewFSM()
+
+	// Initialize message generator
+	messageGen := bot.NewMessageGenerator(cfg)
+
+	// Initialize bot
+	b := bot.NewBot(cfg, storage, fsmEngine, messageGen)
+
+	// Start bot with graceful shutdown
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	go b.Start()
+
+	<-ctx.Done()
+	slog.Info("Bot stopped by signal (Ctrl+C or SIGTERM)")
 }

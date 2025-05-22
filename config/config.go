@@ -14,7 +14,10 @@ func Load() (*Config, error) {
 	viper.AddConfigPath(".")
 	viper.AutomaticEnv()
 
-	_ = viper.ReadInConfig() // игнорируем ошибку, если файла нет, нужно будет проверить
+	err := viper.ReadInConfig()
+	if err != nil {
+		return nil, err
+	}
 
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
