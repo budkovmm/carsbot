@@ -58,6 +58,9 @@ func (f *SimpleFSM) Transition(st *state.UserState, input string) {
 		st.City = input
 		st.Step = 10
 		return
+	case 10:
+		st.Step = 11
+		return
 	default:
 		return
 	}
