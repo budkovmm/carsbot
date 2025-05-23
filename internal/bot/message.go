@@ -14,26 +14,24 @@ func NewMessageGenerator(cfg interface{}) *MessageGenerator {
 }
 
 func (mg *MessageGenerator) GenerateByState(st *state.UserState) string {
-	if st.Step == 0 {
+	if st.Step == 1 {
 		return "Введите ФИО продавца:"
-	} else if st.Step == 1 {
-		return "Введите ФИО покупателя:"
 	} else if st.Step == 2 {
-		return "Введите VIN автомобиля:"
+		return "Введите ФИО покупателя:"
 	} else if st.Step == 3 {
-		return "Введите марку и модель автомобиля:"
+		return "Введите VIN автомобиля:"
 	} else if st.Step == 4 {
-		return "Введите год выпуска автомобиля:"
+		return "Введите марку и модель автомобиля:"
 	} else if st.Step == 5 {
-		return "Введите цвет автомобиля:"
+		return "Введите год выпуска автомобиля:"
 	} else if st.Step == 6 {
-		return "Введите цену автомобиля:"
+		return "Введите цвет автомобиля:"
 	} else if st.Step == 7 {
-		return "Введите дату продажи:"
+		return "Введите цену автомобиля:"
 	} else if st.Step == 8 {
-		return "Введите город продажи:"
+		return "Введите дату продажи:"
 	} else if st.Step == 9 {
-		return "Введите номер телефона:"
+		return "Введите город продажи:"
 	} else if st.Step == 10 {
 		return "Спасибо! Вот все данные, которые вы ввели:\n" +
 			"ФИО продавца: " + st.SellerName + "\n" +
