@@ -1,39 +1,48 @@
 package main
 
 import (
-	"log"
+	"context"
+	"log/slog"
 	"os"
-	"time"
+	"os/signal"
+	"syscall"
 
-	"carsbot/interanal/bot"
-
-	"gopkg.in/telebot.v4"
+	"carsbot/config"
+	"carsbot/internal/bot"
+	"carsbot/internal/fsm"
+	"carsbot/internal/state"
 )
 
-func setBotCommands(b *telebot.Bot) error {
-	commands := []telebot.Command{
-		{Text: "start", Description: "Начать работу с ботом"},
-		{Text: "help", Description: "Получить справку"},
-		{Text: "reset", Description: "Начать оформление заново"},
-	}
-	return b.SetCommands(commands)
-}
-
 func main() {
-	pref := telebot.Settings{
-		Token:  os.Getenv("TG_BOT_TOKEN"),
-		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
-	}
+	// Initialize logger
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 
-	b, err := telebot.NewBot(pref)
+	// Load config
+	cfg, err := config.Load()
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("config error", "err", err)
+		panic(err)
 	}
 
-	if err := setBotCommands(b); err != nil {
-		log.Println("setting bot commands failed", err)
-	}
+	// Initialize storage
+	storage := state.NewInMemoryStorage()
 
-	bot.RegisterHandlers(b)
-	b.Start()
+	// Initialize FSM
+	fsmEngine := fsm.NewFSM()
+
+	// Initialize message generator
+	messageGen := bot.NewMessageGenerator(cfg)
+
+	// Initialize bot
+	b := bot.NewBot(cfg, storage, fsmEngine, messageGen)
+
+	// Start bot with graceful shutdown
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	go b.Start()
+
+	<-ctx.Done()
+	slog.Info("Bot stopped by signal (Ctrl+C or SIGTERM)")
 }
