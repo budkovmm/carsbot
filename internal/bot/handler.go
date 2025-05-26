@@ -4,18 +4,37 @@ import (
 	"log/slog"
 
 	"carsbot/internal/fsm"
+	"carsbot/internal/msg"
 	"carsbot/internal/state"
 
 	"gopkg.in/telebot.v4"
 )
 
-type Handler struct {
-	storage state.StateStorage
-	fsm     fsm.FSM
-	msg     *MessageGenerator
+type UserStateStorage interface {
+	Get(userID int64) (*state.UserState, error)
+	Set(userID int64, state *state.UserState) error
+	Delete(userID int64) error
 }
 
-func NewHandler(storage state.StateStorage, fsm fsm.FSM, msg *MessageGenerator) *Handler {
+type FSM interface {
+	Transition(st *state.UserState, input string)
+}
+
+type MessageGenerator interface {
+	Welcome() string
+	ForStep(st *state.UserState) string
+	Error() string
+	Reset() string
+	Help() string
+}
+
+type Handler struct {
+	storage UserStateStorage
+	fsm     fsm.FSM
+	msg     *msg.MessageGenerator
+}
+
+func NewHandler(storage state.StateStorage, fsm fsm.FSM, msg *msg.MessageGenerator) *Handler {
 	slog.Info("handler created")
 	return &Handler{storage: storage, fsm: fsm, msg: msg}
 }

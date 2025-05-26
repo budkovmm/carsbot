@@ -1,4 +1,4 @@
-package bot
+package msg
 
 import (
 	"log/slog"
@@ -8,7 +8,7 @@ import (
 
 type MessageGenerator struct{}
 
-func NewMessageGenerator(cfg interface{}) *MessageGenerator {
+func NewMessageGenerator() *MessageGenerator {
 	slog.Info("message generator created")
 	return &MessageGenerator{}
 }
