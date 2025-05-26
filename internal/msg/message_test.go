@@ -1,4 +1,4 @@
-package bot
+package msg
 
 import (
 	"carsbot/internal/state"

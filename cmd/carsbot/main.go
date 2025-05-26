@@ -10,6 +10,7 @@ import (
 	"carsbot/config"
 	"carsbot/internal/bot"
 	"carsbot/internal/fsm"
+	"carsbot/internal/msg"
 	"carsbot/internal/state"
 )
 
@@ -32,7 +33,7 @@ func main() {
 	fsmEngine := fsm.NewFSM()
 
 	// Initialize message generator
-	messageGen := bot.NewMessageGenerator(cfg)
+	messageGen := msg.NewMessageGenerator()
 
 	// Initialize bot
 	b := bot.NewBot(cfg, storage, fsmEngine, messageGen)
