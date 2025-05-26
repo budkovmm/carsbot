@@ -2,8 +2,11 @@ package handler
 
 import (
 	"log/slog"
+	"os"
+	"path/filepath"
 
 	"carsbot/internal/fsm"
+	"carsbot/internal/pdfgen"
 	"carsbot/internal/state"
 
 	"gopkg.in/telebot.v4"
@@ -64,6 +67,16 @@ func (h *Handler) OnText(c telebot.Context) error {
 	}
 	h.fsm.Transition(st, c.Text())
 	h.storage.Set(userID, st)
+	if st.Step == 10 {
+		// Все данные собраны, генерируем PDF
+		tmpDir := os.TempDir()
+		pdfPath := filepath.Join(tmpDir, "contract.pdf")
+		err := pdfgen.GenerateContractPDF(st, pdfPath)
+		if err != nil {
+			return c.Send("Ошибка генерации PDF: " + err.Error())
+		}
+		return c.Send(&telebot.Document{File: telebot.FromDisk(pdfPath), FileName: "ДКП.pdf"})
+	}
 	return c.Send(h.msg.ForStep(st))
 }
 
