@@ -1,10 +1,9 @@
-package bot
+package handler
 
 import (
 	"log/slog"
 
 	"carsbot/internal/fsm"
-	"carsbot/internal/msg"
 	"carsbot/internal/state"
 
 	"gopkg.in/telebot.v4"
@@ -31,10 +30,10 @@ type MessageGenerator interface {
 type Handler struct {
 	storage UserStateStorage
 	fsm     fsm.FSM
-	msg     *msg.MessageGenerator
+	msg     MessageGenerator
 }
 
-func NewHandler(storage state.StateStorage, fsm fsm.FSM, msg *msg.MessageGenerator) *Handler {
+func New(storage state.StateStorage, fsm fsm.FSM, msg MessageGenerator) *Handler {
 	slog.Info("handler created")
 	return &Handler{storage: storage, fsm: fsm, msg: msg}
 }

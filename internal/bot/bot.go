@@ -3,6 +3,7 @@ package bot
 import (
 	"carsbot/config"
 	"carsbot/internal/fsm"
+	"carsbot/internal/handler"
 	"carsbot/internal/msg"
 	"carsbot/internal/state"
 
@@ -17,7 +18,7 @@ type Bot struct {
 	storage state.StateStorage
 	fsm     fsm.FSM
 	msg     *msg.MessageGenerator
-	handler *Handler
+	handler *handler.Handler
 }
 
 func LogHandlerDuration(next telebot.HandlerFunc) telebot.HandlerFunc {
@@ -44,7 +45,7 @@ func NewBot(cfg *config.Config, storage state.StateStorage, fsm fsm.FSM, msg *ms
 		msg:     msg,
 	}
 	b.Use(LogHandlerDuration)
-	botInstance.handler = NewHandler(storage, fsm, msg)
+	botInstance.handler = handler.New(storage, fsm, msg)
 	botInstance.handler.Register(b)
 	return botInstance
 }
